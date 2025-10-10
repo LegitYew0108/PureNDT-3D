@@ -10,6 +10,8 @@ using Transform3D = Eigen::Matrix4d;
 
 class NDTMatcher {
 public:
+  explicit NDTMatcher();
+
   Transform3D align(const std::vector<Point3D> &source_points,
                     const VoxelGrid &voxel_grids,
                     const Transform3D initial_transform);

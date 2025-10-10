@@ -4,6 +4,7 @@
 #include "eigen3/Eigen/Core"
 #include "ndt_matcher.hpp"
 #include "voxel.hpp"
+#include <memory>
 #include <vector>
 
 namespace PureNDT3D {
@@ -14,6 +15,21 @@ using Transform3D = Eigen::Matrix4d;
 
 class NDTCore {
 public:
+  /**
+   * @brief default constructor for NDTCore.
+   * @author LegitYew0108(Wada Haruto)
+   */
+  explicit NDTCore();
+  /**
+   * @brief constructor with configs for NDTCore.
+   * @author LegitYew0108(Wada Haruto)
+   */
+  explicit NDTCore(const NDTConfig &configs);
+  /**
+   * @brief destructor with configs for NDTCore.
+   * @author LegitYew0108(Wada Haruto)
+   */
+  ~NDTCore();
   /**
    * @brief set all configurations for PureNDT3D
    * @author LegitYew0108(Wada Haruto)
@@ -45,8 +61,8 @@ public:
                     const Transform3D &initial_transform);
 
 private:
-  NDTConfig configs;
-  VoxelGrid voxel_grid;
+  NDTConfig configs_;
+  std::unique_ptr<VoxelGrid> voxel_grid_;
 };
 
 } // namespace PureNDT3D
