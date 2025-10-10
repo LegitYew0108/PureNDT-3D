@@ -1,3 +1,11 @@
+/**
+ * @file	voxel.hpp
+ * @brief	declalation of Voxel and VoxelGrid.
+ * @date	2025/10/10
+ * @author	LegitYew0108(Wada Haruto)
+ * @note	hash combine funcs are defined here.
+ */
+
 #pragma once
 
 #include <eigen3/Eigen/Core>
@@ -7,6 +15,12 @@
 #include <vector>
 
 namespace PureNDT3D {
+
+/**
+ * @struct VoxelIndex
+ * @brief Index corresponding to each coordinate for using unordered_map in
+ * VoxelGrid.
+ */
 struct VoxelIndex {
   int x, y, z;
 
@@ -15,7 +29,12 @@ struct VoxelIndex {
   }
 };
 
+/**
+ * @struct VoxelHash
+ * @brief Structure for calculating the hash value of VoxelIndex.
+ */
 struct VoxelHash {
+  // from Boost hash_combine func(64bit ver)
   size_t hash_combine(size_t seed, size_t new_hash) const {
     return new_hash + 0x9e3779b97f4a7c15LLU + (seed << 12) + (seed >> 4);
   }
@@ -32,8 +51,10 @@ using Point3D = Eigen::Vector3d;
 using Covariance3D = Eigen::Matrix4d;
 
 struct Voxel {
+  // for NDT
   Point3D average;
   Covariance3D covariance;
+
   std::vector<Point3D> points;
 };
 
