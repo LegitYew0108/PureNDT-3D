@@ -60,7 +60,7 @@ public:
   Transform3D align(const std::vector<Point3D> &points,
                     const Transform3D &initial_transform);
 
-private:
+protected:
   NDTConfig configs_;
   std::unique_ptr<VoxelGrid> voxel_grid_;
 };
