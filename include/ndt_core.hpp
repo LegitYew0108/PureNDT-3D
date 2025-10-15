@@ -66,6 +66,8 @@ protected:
   NDTConfig configs_;
   std::unique_ptr<VoxelGrid> voxel_grid_;
 
+  void check_config(NDTConfig &configs_);
+
   LoggerCallback logger_;
 
   void log(LogLevel level, const std::string &message) {

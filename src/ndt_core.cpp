@@ -2,10 +2,18 @@
 
 namespace PureNDT3D {
 NDTCore::NDTCore() {}
-NDTCore::NDTCore(const NDTConfig &configs) {}
+NDTCore::NDTCore(const NDTConfig &configs) { set_configurations(configs); }
 NDTCore::~NDTCore() {}
 
-void NDTCore::set_configurations(const NDTConfig &configs) {}
+void NDTCore::set_configurations(const NDTConfig &configs) {
+  configs_ = configs;
+}
+
+void check_config(NDTConfig &configs) {
+  if (configs.epsilon_rot < 0.0f) {
+    throw;
+  }
+}
 
 void NDTCore::add_target_points(const std::vector<Point3D> &points) {}
 
