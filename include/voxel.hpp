@@ -64,6 +64,8 @@ public:
 
   void add_points(std::vector<Point3D>);
 
+  std::unordered_map<VoxelIndex, Voxel, VoxelHash> *get_voxels();
+
 protected:
   std::unordered_map<VoxelIndex, Voxel, VoxelHash> voxels_;
 };
