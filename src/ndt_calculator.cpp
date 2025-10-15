@@ -1,4 +1,5 @@
 #include "ndt_calculator.hpp"
+#include "voxel.hpp"
 
 namespace PureNDT3D {
 namespace NDTCalculator {

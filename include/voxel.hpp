@@ -48,7 +48,7 @@ struct VoxelHash {
 };
 
 using Point3D = Eigen::Vector3d;
-using Covariance3D = Eigen::Matrix4d;
+using Covariance3D = Eigen::Matrix3d;
 
 struct Voxel {
   // for NDT
