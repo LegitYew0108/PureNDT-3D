@@ -11,8 +11,8 @@
 namespace PureNDT3D {
 
 using Point3D = Eigen::Vector3d;
-using Covariance3D = Eigen::Matrix4d;
-using Transform3D = Eigen::Matrix4d;
+using Covariance3D = Eigen::Matrix3d;
+using Transform3D = Eigen::Matrix3d;
 
 enum class LogLevel { Error, Warning, Info, Debug };
 

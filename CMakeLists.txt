@@ -6,7 +6,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_library(PureNDT3D SHARED
-	src/ndt_core.cpp)
+	src/ndt_core.cpp
+	src/ndt_calculator.cpp
+	src/voxel.cpp
+	src/ndt_optimizer.cpp
+)
 
 target_include_directories(PureNDT3D PUBLIC
 	include)

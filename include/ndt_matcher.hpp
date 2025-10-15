@@ -6,7 +6,7 @@
 
 namespace PureNDT3D {
 using Point3D = Eigen::Vector3d;
-using Transform3D = Eigen::Matrix4d;
+using Transform3D = Eigen::Matrix3d;
 
 class NDTMatcher {
 public:

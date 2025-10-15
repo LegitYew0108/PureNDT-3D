@@ -48,7 +48,7 @@ struct VoxelHash {
 };
 
 using Point3D = Eigen::Vector3d;
-using Covariance3D = Eigen::Matrix4d;
+using Covariance3D = Eigen::Matrix3d;
 
 struct Voxel {
   // for NDT
@@ -63,6 +63,8 @@ public:
   VoxelGrid();
 
   void add_points(std::vector<Point3D>);
+
+  std::unordered_map<VoxelIndex, Voxel, VoxelHash> *get_voxels();
 
 protected:
   std::unordered_map<VoxelIndex, Voxel, VoxelHash> voxels_;
