@@ -10,38 +10,53 @@ Point3D transform(Eigen::Vector3d point, Transform4D transform_mat) {
   return (transform_mat * homogeneous_point).block<3, 1>(0, 0);
 }
 
-Transform4D NDTOptimizer::calc_update(
-    const std::vector<std::pair<Point3D, double>> &source_points,
-    VoxelGrid &voxel_grid, const Transform4D &current_transform) {
+TransformWithScore
+NDTOptimizer::calc_update(const std::vector<Point3D> &source_points,
+                          VoxelGrid &voxel_grid,
+                          const Transform4D &current_transform) {
   // 同次座標変換行列から回転行列部を抜き出す
   RotationMatrix3D R = current_transform.block<3, 3>(0, 0);
   Eigen::Vector<double, 6> gradient = Eigen::Vector<double, 6>::Zero();
   Eigen::Matrix<double, 6, 6> H = Eigen::Matrix<double, 6, 6>::Zero();
 
-  for (std::pair<Point3D, double> point_w_score : source_points) {
+  for (Point3D point : source_points) {
     // 座標変換
-    Point3D transformed_point =
-        transform(point_w_score.first, current_transform);
+    Point3D transformed_point = transform(point, current_transform);
 
     VoxelIndex index = get_point_index(transformed_point);
     // TODO:at関数のtry_catch実装
     Voxel voxel = voxel_grid.get_voxels()->at(index);
 
+    double score = get_score(transformed_point, voxel);
+
     // その点のヤコビアンを求める
-    Eigen::Matrix<double, 3, 6> J = get_jacobian(point_w_score.first, R);
+    Eigen::Matrix<double, 3, 6> J = get_jacobian(point, R);
 
     // 勾配を求めて、総和に加える
-    gradient += get_gradient(transformed_point, point_w_score.second, J, voxel);
+    gradient += get_gradient(transformed_point, score, J, voxel);
 
     // ヘッセ行列を求めて、総和に加える
-    H += get_hessian(transformed_point, point_w_score.second, J, voxel);
+    H += get_hessian(transformed_point, score, J, voxel);
   }
 
   Eigen::Vector<double, 6> transform_inc = -H.ldlt().solve(gradient);
 
   Transform4D transform_inc_mat = se3_exp(transform_inc);
   Transform4D new_transform = transform_inc_mat * current_transform;
-  return new_transform;
+  double total_score = 0.0;
+
+  for (Point3D point : source_points) {
+    Point3D transformed_point = transform(point, new_transform);
+
+    VoxelIndex index = get_point_index(transformed_point);
+    // TODO:at関数のtry_catch実装
+    Voxel voxel = voxel_grid.get_voxels()->at(index);
+
+    total_score += get_score(transformed_point, voxel);
+  }
+
+  TransformWithScore t_w_s = TransformWithScore{new_transform, total_score};
+  return t_w_s;
 }
 
 double NDTOptimizer::get_score(const Point3D &transformed_point, Voxel &voxel) {

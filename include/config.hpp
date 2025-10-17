@@ -1,13 +1,22 @@
 #pragma once
 
+#include <functional>
+#include <string>
+
 namespace PureNDT3D {
+
+enum class LogLevel { Error, Warning, Info, Debug };
+
+using LoggerCallback = std::function<void(LogLevel, const std::string &)>;
+
 struct NDTConfig {
   // === VoxelGridに関する設定===
   double voxel_resolution_m_{0.3f};
 
   // === 最適化計算の設定===
-  int max_iterations{30};
-  double epsilon_trans{1e-2};
-  double epsilon_rot{1e-2};
+  int max_iterations_{100};
+  double score_threshold_{0.1f};
+
+  LoggerCallback logger_{nullptr};
 };
 } // namespace PureNDT3D

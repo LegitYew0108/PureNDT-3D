@@ -13,13 +13,18 @@ using RotationMatrix3D = Eigen::Matrix3d;
 
 Point3D transform(Eigen::Vector3d point, Transform4D transform_mat);
 
+struct TransformWithScore {
+  Transform4D transform;
+  double score;
+};
+
 class NDTOptimizer {
 public:
   explicit NDTOptimizer(const NDTConfig &config);
 
-  Transform4D
-  calc_update(const std::vector<std::pair<Point3D, double>> &source_points,
-              VoxelGrid &voxel_grid, const Transform4D &current_transform);
+  TransformWithScore calc_update(const std::vector<Point3D> &source_points,
+                                 VoxelGrid &voxel_grid,
+                                 const Transform4D &current_transform);
 
   double get_score(const Point3D &transformed_point, Voxel &voxel);
 

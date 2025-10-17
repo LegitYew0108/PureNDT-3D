@@ -1,5 +1,7 @@
 #pragma once
 
+#include "config.hpp"
+#include "ndt_optimizer.hpp"
 #include "voxel.hpp"
 #include <eigen3/Eigen/Core>
 #include <vector>
@@ -13,7 +15,8 @@ public:
   explicit NDTMatcher();
 
   Transform4D align(const std::vector<Point3D> &source_points,
-                    const VoxelGrid &voxel_grids,
-                    const Transform4D initial_transform);
+                    VoxelGrid &voxel_grid, const Transform4D initial_transform);
+  NDTConfig config_;
+  NDTOptimizer optimizer_;
 };
 } // namespace PureNDT3D

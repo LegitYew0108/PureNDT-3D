@@ -5,12 +5,18 @@ NDTCore::NDTCore() {}
 NDTCore::NDTCore(const NDTConfig &configs) { set_configurations(configs); }
 NDTCore::~NDTCore() {}
 
+void log(LoggerCallback logger, LogLevel level, const char *message, ...) {
+  if (logger) {
+    logger(level, message);
+  }
+}
+
 void NDTCore::set_configurations(const NDTConfig &configs) {
   configs_ = configs;
 }
 
 void check_config(NDTConfig &configs) {
-  if (configs.epsilon_rot < 0.0f) {
+  if (configs.score_threshold_ < 0.0f) {
     throw;
   }
 }
