@@ -70,8 +70,8 @@ public:
   // TODO: 一部の範囲の点のみ消去する関数を追加
 
   std::unordered_map<VoxelIndex, Voxel, VoxelHash> *get_voxels();
-  const Voxel get_voxel_const(const VoxelIndex &index) const;
-  const Voxel get_voxel_const(const Point3D &point) const;
+  const Voxel *get_voxel_const(const VoxelIndex &index) const;
+  const Voxel *get_voxel_const(const Point3D &point) const;
 
   VoxelIndex get_point_index(const Point3D &point) const;
 

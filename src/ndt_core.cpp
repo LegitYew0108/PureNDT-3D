@@ -1,4 +1,5 @@
 #include "ndt_core.hpp"
+#include "ndt_matcher.hpp"
 #include <filesystem>
 #include <memory>
 
@@ -30,7 +31,7 @@ void NDTCore::add_target_points(const std::vector<Point3D> &points) {
   this->voxel_grid_->add_points(points);
 }
 
-void NDTCore::remove_all_target_points() {}
+void NDTCore::remove_all_target_points() { voxel_grid_->remove_all_points(); }
 
 void NDTCore::replace_target_points(const std::vector<Point3D> &points) {
   remove_all_target_points();
@@ -39,6 +40,6 @@ void NDTCore::replace_target_points(const std::vector<Point3D> &points) {
 
 Transform4D NDTCore::align(const std::vector<Point3D> &points,
                            const Transform4D &initial_transform) {
-  return matcher_->align(points, std::move(voxel_grid_), initial_transform);
+  return matcher_->align(points, *voxel_grid_, initial_transform);
 }
 } // namespace PureNDT3D

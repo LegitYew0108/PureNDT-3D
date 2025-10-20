@@ -12,7 +12,7 @@ Point3D transform(Eigen::Vector3d point, Transform4D transform_mat) {
 
 TransformUpdateType
 NDTOptimizer::calc_update(const std::vector<Point3D> &source_points,
-                          std::unique_ptr<VoxelGrid> voxel_grid,
+                          const VoxelGrid &voxel_grid,
                           const Transform4D &current_transform) {
   // 同次座標変換行列から回転行列部を抜き出す
   RotationMatrix3D R = current_transform.block<3, 3>(0, 0);
@@ -23,19 +23,19 @@ NDTOptimizer::calc_update(const std::vector<Point3D> &source_points,
     // 座標変換
     Point3D transformed_point = transform(point, current_transform);
 
-    // TODO:at関数のtry_catch実装
-    const Voxel voxel = voxel_grid->get_voxel_const(transformed_point);
+    // TODO:nullptrのときの処理
+    const Voxel *voxel = voxel_grid.get_voxel_const(transformed_point);
 
-    double score = get_score(transformed_point, voxel);
+    double score = get_score(transformed_point, *voxel);
 
     // その点のヤコビアンを求める
     Eigen::Matrix<double, 3, 6> J = get_jacobian(point, R);
 
     // 勾配を求めて、総和に加える
-    gradient += get_gradient(transformed_point, score, J, voxel);
+    gradient += get_gradient(transformed_point, score, J, *voxel);
 
     // ヘッセ行列を求めて、総和に加える
-    H += get_hessian(transformed_point, score, J, voxel);
+    H += get_hessian(transformed_point, score, J, *voxel);
   }
 
   Eigen::Vector<double, 6> transform_inc = -H.ldlt().solve(gradient);
@@ -47,14 +47,13 @@ NDTOptimizer::calc_update(const std::vector<Point3D> &source_points,
   for (Point3D point : source_points) {
     Point3D transformed_point = transform(point, new_transform);
 
-    // TODO:at関数のtry_catch実装
-    const Voxel voxel = voxel_grid->get_voxel_const(transformed_point);
+    // TODO:nullptrのときの処理
+    const Voxel *voxel = voxel_grid.get_voxel_const(transformed_point);
 
-    total_score += get_score(transformed_point, voxel);
+    total_score += get_score(transformed_point, *voxel);
   }
 
-  TransformUpdateType update =
-      TransformUpdateType{new_transform, total_score, std::move(voxel_grid)};
+  TransformUpdateType update = TransformUpdateType{new_transform, total_score};
   return update;
 }
 

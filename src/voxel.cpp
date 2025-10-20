@@ -8,13 +8,16 @@ std::unordered_map<VoxelIndex, Voxel, VoxelHash> *VoxelGrid::get_voxels() {
   return &voxels_;
 }
 
-const Voxel VoxelGrid::get_voxel_const(const VoxelIndex &index) const {
-  // TODO: try_catch
-  const Voxel voxel = voxels_.at(index);
-  return voxel;
+const Voxel *VoxelGrid::get_voxel_const(const VoxelIndex &index) const {
+  auto it = voxels_.find(index);
+  if (it == voxels_.end()) {
+    return nullptr;
+  } else {
+    return &it->second;
+  }
 }
 
-const Voxel VoxelGrid::get_voxel_const(const Point3D &point) const {
+const Voxel *VoxelGrid::get_voxel_const(const Point3D &point) const {
   return get_voxel_const(get_point_index(point));
 }
 
@@ -23,18 +26,7 @@ VoxelGrid::VoxelGrid(const NDTConfig &config) { config_ = config; }
 void VoxelGrid::add_points(std::vector<Point3D> points) {
   for (Point3D point : points) {
     VoxelIndex index = get_point_index(point);
-    if (this->voxels_.count(index) == 1) {
-      Voxel voxel = voxels_.at(index);
-      voxel.points.push_back(point);
-    } else {
-      // 同じindexのvoxelが存在しなかった時
-      // 新しいvoxelを作り、挿入する
-      Voxel new_voxel;
-      new_voxel.average = Point3D::Zero();
-      new_voxel.covariance = Covariance3D::Zero();
-      new_voxel.points.push_back(point);
-      this->voxels_.emplace(index, new_voxel);
-    }
+    voxels_[index].points.push_back(point);
   }
 
   // 平均と共分散行列を求める

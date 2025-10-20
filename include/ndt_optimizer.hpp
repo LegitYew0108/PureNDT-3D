@@ -17,7 +17,6 @@ Point3D transform(Eigen::Vector3d point, Transform4D transform_mat);
 struct TransformUpdateType {
   Transform4D transform;
   double score;
-  std::unique_ptr<VoxelGrid> voxel_grid;
 };
 
 class NDTOptimizer {
@@ -25,7 +24,7 @@ public:
   explicit NDTOptimizer(const NDTConfig &config);
 
   TransformUpdateType calc_update(const std::vector<Point3D> &source_points,
-                                  std::unique_ptr<VoxelGrid> voxel_grid,
+                                  const VoxelGrid &voxel_grid,
                                   const Transform4D &current_transform);
 
   double get_score(const Point3D &transformed_point, const Voxel &voxel);
