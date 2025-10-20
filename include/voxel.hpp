@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "config.hpp"
 #include <eigen3/Eigen/Core>
 #include <functional>
 #include <unordered_map>
@@ -60,14 +61,23 @@ struct Voxel {
 
 class VoxelGrid {
 public:
-  VoxelGrid();
+  VoxelGrid(const NDTConfig &configs_);
 
   void add_points(std::vector<Point3D>);
 
+  void remove_all_points();
+
+  // TODO: 一部の範囲の点のみ消去する関数を追加
+
   std::unordered_map<VoxelIndex, Voxel, VoxelHash> *get_voxels();
+  const Voxel get_voxel_const(const VoxelIndex &index) const;
+  const Voxel get_voxel_const(const Point3D &point) const;
+
+  VoxelIndex get_point_index(const Point3D &point) const;
 
 protected:
   std::unordered_map<VoxelIndex, Voxel, VoxelHash> voxels_;
+  NDTConfig config_;
 };
 
 } // namespace PureNDT3D

@@ -10,9 +10,9 @@ Point3D transform(Eigen::Vector3d point, Transform4D transform_mat) {
   return (transform_mat * homogeneous_point).block<3, 1>(0, 0);
 }
 
-TransformWithScore
+TransformUpdateType
 NDTOptimizer::calc_update(const std::vector<Point3D> &source_points,
-                          VoxelGrid &voxel_grid,
+                          std::unique_ptr<VoxelGrid> voxel_grid,
                           const Transform4D &current_transform) {
   // 同次座標変換行列から回転行列部を抜き出す
   RotationMatrix3D R = current_transform.block<3, 3>(0, 0);
@@ -23,9 +23,8 @@ NDTOptimizer::calc_update(const std::vector<Point3D> &source_points,
     // 座標変換
     Point3D transformed_point = transform(point, current_transform);
 
-    VoxelIndex index = get_point_index(transformed_point);
     // TODO:at関数のtry_catch実装
-    Voxel voxel = voxel_grid.get_voxels()->at(index);
+    const Voxel voxel = voxel_grid->get_voxel_const(transformed_point);
 
     double score = get_score(transformed_point, voxel);
 
@@ -48,18 +47,19 @@ NDTOptimizer::calc_update(const std::vector<Point3D> &source_points,
   for (Point3D point : source_points) {
     Point3D transformed_point = transform(point, new_transform);
 
-    VoxelIndex index = get_point_index(transformed_point);
     // TODO:at関数のtry_catch実装
-    Voxel voxel = voxel_grid.get_voxels()->at(index);
+    const Voxel voxel = voxel_grid->get_voxel_const(transformed_point);
 
     total_score += get_score(transformed_point, voxel);
   }
 
-  TransformWithScore t_w_s = TransformWithScore{new_transform, total_score};
-  return t_w_s;
+  TransformUpdateType update =
+      TransformUpdateType{new_transform, total_score, std::move(voxel_grid)};
+  return update;
 }
 
-double NDTOptimizer::get_score(const Point3D &transformed_point, Voxel &voxel) {
+double NDTOptimizer::get_score(const Point3D &transformed_point,
+                               const Voxel &voxel) {
   double score = -ndt_pdf(transformed_point, voxel);
   return score;
 }
@@ -70,17 +70,6 @@ double NDTOptimizer::ndt_pdf(const Point3D &point, const Voxel &voxel) {
   double det = voxel.covariance.determinant();
   double coeff = 1.0 / sqrt(pow(2 * M_PI, 3) * det);
   return coeff * std::exp(exponent);
-}
-
-VoxelIndex NDTOptimizer::get_point_index(const Point3D &point) {
-  VoxelIndex index;
-  index.x =
-      static_cast<int>(std::floor(point(0) / config_.voxel_resolution_m_));
-  index.y =
-      static_cast<int>(std::floor(point(1) / config_.voxel_resolution_m_));
-  index.z =
-      static_cast<int>(std::floor(point(2) / config_.voxel_resolution_m_));
-  return index;
 }
 
 Eigen::Matrix<double, 3, 6>

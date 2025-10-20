@@ -5,6 +5,7 @@
 #include <eigen3/Eigen/Cholesky>
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/LU>
+#include <memory>
 
 namespace PureNDT3D {
 using Point3D = Eigen::Vector3d;
@@ -13,25 +14,24 @@ using RotationMatrix3D = Eigen::Matrix3d;
 
 Point3D transform(Eigen::Vector3d point, Transform4D transform_mat);
 
-struct TransformWithScore {
+struct TransformUpdateType {
   Transform4D transform;
   double score;
+  std::unique_ptr<VoxelGrid> voxel_grid;
 };
 
 class NDTOptimizer {
 public:
   explicit NDTOptimizer(const NDTConfig &config);
 
-  TransformWithScore calc_update(const std::vector<Point3D> &source_points,
-                                 VoxelGrid &voxel_grid,
-                                 const Transform4D &current_transform);
+  TransformUpdateType calc_update(const std::vector<Point3D> &source_points,
+                                  std::unique_ptr<VoxelGrid> voxel_grid,
+                                  const Transform4D &current_transform);
 
-  double get_score(const Point3D &transformed_point, Voxel &voxel);
+  double get_score(const Point3D &transformed_point, const Voxel &voxel);
 
 protected:
   double ndt_pdf(const Point3D &point, const Voxel &voxel);
-
-  VoxelIndex get_point_index(const Point3D &point);
 
   Eigen::Matrix<double, 3, 6>
   get_jacobian(const Point3D &point, const RotationMatrix3D &rotation_mat);

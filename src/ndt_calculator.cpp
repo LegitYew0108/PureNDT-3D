@@ -30,5 +30,6 @@ void calc_statistics(VoxelGrid &voxel_grid) {
         covariance_sum / voxel_pair.second.points.size();
   }
 }
+
 } // namespace NDTCalculator
 } // namespace PureNDT3D
