@@ -39,7 +39,7 @@ void NDTCore::replace_target_points(const std::vector<Point3D> &points) {
 }
 
 Transform4D NDTCore::align(const std::vector<Point3D> &points,
-                           const Transform4D &initial_transform) {
+                           const TransformVec6D &initial_transform) {
   return matcher_->align(points, *voxel_grid_, initial_transform);
 }
 } // namespace PureNDT3D

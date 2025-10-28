@@ -12,9 +12,9 @@ NDTMatcher::NDTMatcher(const NDTConfig &config) {
 
 Transform4D NDTMatcher::align(const std::vector<Point3D> &source_points,
                               const VoxelGrid &voxel_grid,
-                              const Transform4D initial_transform) {
+                              const TransformVec6D initial_transform) {
   int iteration = 0;
-  Transform4D current_transform = initial_transform;
+  TransformVec6D current_transform = initial_transform;
   while (true) {
     TransformUpdateType transform_update =
         optimizer_->calc_update(source_points, voxel_grid, current_transform);

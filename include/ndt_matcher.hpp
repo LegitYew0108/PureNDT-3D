@@ -10,6 +10,7 @@
 namespace PureNDT3D {
 using Point3D = Eigen::Vector3d;
 using Transform4D = Eigen::Matrix4d;
+using TransformVec6D = Eigen::Vector<double, 6>;
 
 struct TransformWithVoxelGrid {
   Transform4D transform;
@@ -22,7 +23,7 @@ public:
 
   Transform4D align(const std::vector<Point3D> &source_points,
                     const VoxelGrid &voxel_grid,
-                    const Transform4D initial_transform);
+                    const TransformVec6D initial_transform);
   NDTConfig config_;
   std::unique_ptr<NDTOptimizer> optimizer_;
 };

@@ -57,6 +57,8 @@ struct Voxel {
   Covariance3D covariance;
 
   std::vector<Point3D> points;
+  double d_1;
+  double d_2;
 };
 
 class VoxelGrid {

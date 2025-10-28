@@ -13,6 +13,7 @@ namespace PureNDT3D {
 using Point3D = Eigen::Vector3d;
 using Covariance3D = Eigen::Matrix3d;
 using Transform4D = Eigen::Matrix4d;
+using TransformVec6D = Eigen::Vector<double, 6>;
 
 void log(LoggerCallback logger, LogLevel level, const char *message, ...);
 
@@ -49,7 +50,7 @@ public:
    * @brief input points for PureNDT3D and returns aligned new_transform.
    */
   Transform4D align(const std::vector<Point3D> &points,
-                    const Transform4D &initial_transform);
+                    const TransformVec6D &initial_transform);
 
 protected:
   NDTConfig configs_;
