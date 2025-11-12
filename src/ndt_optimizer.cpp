@@ -39,13 +39,14 @@ RotationMatrix3D get_rotation_mat_z(double theta) {
   return z_mat;
 }
 
-NDTOptimizer::NDTOptimizer(const NDTConfig &config) { config_ = config; }
+NDTOptimizer::NDTOptimizer(const NDTConfig &config) : config_(config) { ; }
 
 TransformUpdateType
 NDTOptimizer::calc_update(const std::vector<Point3D> &source_points,
                           const VoxelGrid &voxel_grid,
                           const TransformVec6D &current_transform_vec) {
 
+  // TODO
   RotationMatrixes R = get_rotation_mat(current_transform_vec);
   Eigen::Vector<double, 6> gradient = Eigen::Vector<double, 6>::Zero();
   Eigen::Matrix<double, 6, 6> H = Eigen::Matrix<double, 6, 6>::Zero();
@@ -63,15 +64,23 @@ NDTOptimizer::calc_update(const std::vector<Point3D> &source_points,
 
     // その点のヤコビアンを求める
     Eigen::Matrix<double, 3, 6> J = get_jacobian(point, current_transform_vec);
-    Eigen::Matrix<Eigen::Vector3d, 6, 6> second_order_derivative =
-        get_second_order_derivative(point, current_transform_vec);
 
     // 勾配を求めて、総和に加える
     gradient += get_gradient(transformed_point, score, J, *voxel);
 
-    // ヘッセ行列を求めて、総和に加える
-    H += get_hessian(transformed_point, score, J, second_order_derivative,
-                     *voxel);
+    if (config_.use_second_order_derivative_) {
+      // 2次の微分項を使う
+      Eigen::Matrix<Eigen::Vector3d, 6, 6> second_order_derivative =
+          get_second_order_derivative(point, current_transform_vec);
+      // ヘッセ行列を求めて、総和に加える
+      H += get_hessian(transformed_point, score, J, second_order_derivative,
+                       *voxel);
+    } else {
+      // 2次の微分項を使わない
+      // ヘッセ行列を求めて、総和に加える
+      H += get_no_second_order_derivative_hessian(transformed_point, score, J,
+                                                  *voxel);
+    }
   }
 
   TransformVec6D transform_inc =
@@ -86,15 +95,17 @@ NDTOptimizer::calc_update(const std::vector<Point3D> &source_points,
   current_transform_mat.block<3, 1>(0, 3) =
       current_transform_vec.block<3, 1>(0, 0);
   current_transform_mat(3, 3) = 1;
-  Transform4D new_transform = transform_inc_mat * current_transform_mat;
-  TransformVec6D new_vec;
-  new_vec.head<3>() = new_transform.block<3, 1>(0, 3);
-  Eigen::Vector3d euler = new_transform.block<3, 3>(0, 0).eulerAngles(2, 1, 0);
-  new_vec.tail<3>() = euler;
+  TransformDatas new_transform;
+  new_transform.mat = transform_inc_mat * current_transform_mat;
+  // TODO
+  new_transform.vec.head<3>() = new_transform.mat.block<3, 1>(0, 3);
+  Eigen::Vector3d euler =
+      new_transform.mat.block<3, 3>(0, 0).eulerAngles(2, 1, 0);
+  new_transform.vec.tail<3>() = euler;
   double total_score = 0.0;
 
   for (Point3D point : source_points) {
-    Point3D transformed_point = transform(point, new_transform);
+    Point3D transformed_point = transform(point, new_transform.mat);
 
     const Voxel *voxel = voxel_grid.get_voxel_const(transformed_point);
     if (voxel == nullptr) {
@@ -215,6 +226,33 @@ Eigen::Vector<double, 6> NDTOptimizer::get_gradient(
                                       voxel.covariance.inverse() * J *
                                       exp(exponent);
   return gradient;
+}
+
+Eigen::Matrix<double, 6, 6>
+NDTOptimizer::get_no_second_order_derivative_hessian(
+    const Point3D &transformed_point, const double &before_score,
+    const Eigen::Matrix<double, 3, 6> &J, const Voxel &voxel) {
+
+  Point3D diff = transformed_point - voxel.average;
+  double exponent =
+      -0.5 * voxel.d_2 * diff.transpose() * voxel.covariance.inverse() * diff;
+  double coeffs = voxel.d_1 * voxel.d_2 * exp(exponent);
+
+  Eigen::Matrix<double, 6, 6> H = Eigen::Matrix<double, 6, 6>::Zero();
+
+  for (int i = 0; i < 6; i++) {
+    double a =
+        diff.transpose() * voxel.covariance.inverse() * J.block<3, 1>(0, i);
+    for (int j = 0; j < 6; j++) {
+      double b =
+          diff.transpose() * voxel.covariance.inverse() * J.block<3, 1>(0, j);
+      H(i, j) = coeffs * (-voxel.d_2 * a * b + J.block<3, 1>(0, j).transpose() *
+                                                   voxel.covariance.inverse() *
+                                                   J.block<3, 1>(0, i));
+    }
+  }
+
+  return H;
 }
 
 Eigen::Matrix<double, 6, 6> NDTOptimizer::get_hessian(

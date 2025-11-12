@@ -79,7 +79,7 @@ public:
 
 protected:
   std::unordered_map<VoxelIndex, Voxel, VoxelHash> voxels_;
-  NDTConfig config_;
+  const NDTConfig &config_;
 };
 
 } // namespace PureNDT3D

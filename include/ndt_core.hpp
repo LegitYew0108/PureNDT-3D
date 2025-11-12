@@ -15,10 +15,14 @@ using Covariance3D = Eigen::Matrix3d;
 using Transform4D = Eigen::Matrix4d;
 using TransformVec6D = Eigen::Vector<double, 6>;
 
-void log(LoggerCallback logger, LogLevel level, const char *message, ...);
+void log(LoggerCallback logger, LogLevel level, std::string message);
 
 class NDTCore {
 public:
+  /**
+   * @brief constructor with configs for NDTCore.
+   */
+  explicit NDTCore();
   /**
    * @brief constructor with configs for NDTCore.
    */
@@ -49,15 +53,15 @@ public:
   /**
    * @brief input points for PureNDT3D and returns aligned new_transform.
    */
-  Transform4D align(const std::vector<Point3D> &points,
-                    const TransformVec6D &initial_transform);
+  TransformDatas align(const std::vector<Point3D> &points,
+                       const TransformVec6D &initial_transform);
 
 protected:
   NDTConfig configs_;
   std::unique_ptr<VoxelGrid> voxel_grid_;
   std::unique_ptr<NDTMatcher> matcher_;
 
-  void check_config(NDTConfig &configs_);
+  void check_config(NDTConfig &configs);
 };
 
 } // namespace PureNDT3D

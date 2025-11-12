@@ -1,9 +1,15 @@
 #include "ndt_core.hpp"
 #include "ndt_matcher.hpp"
+#include <cstdarg>
+#include <cstdio>
 #include <filesystem>
 #include <memory>
 
 namespace PureNDT3D {
+NDTCore::NDTCore() {
+  voxel_grid_ = std::make_unique<VoxelGrid>(configs_);
+  matcher_ = std::make_unique<NDTMatcher>(configs_);
+}
 NDTCore::NDTCore(const NDTConfig &configs) {
   set_configurations(configs);
   voxel_grid_ = std::make_unique<VoxelGrid>(configs);
@@ -11,17 +17,39 @@ NDTCore::NDTCore(const NDTConfig &configs) {
 }
 NDTCore::~NDTCore() {}
 
-void log(LoggerCallback logger, LogLevel level, const char *message, ...) {
-  if (logger) {
-    logger(level, message);
+void log(LoggerCallback logger, LogLevel level, const char *format, ...) {
+  if (!logger) {
+    return;
   }
+
+  va_list args1;
+  va_start(args1, format);
+
+  va_list args2;
+  // copy args1 because vsnprintf consume va_list.
+  va_copy(args2, args1);
+  // get argument size
+  int size = vsnprintf(nullptr, 0, format, args2);
+  va_end(args2);
+
+  if (size < 0) {
+    va_end(args1);
+    return;
+  }
+
+  // create buffer
+  std::vector<char> buffer(static_cast<size_t>(size) + 1);
+  vsnprintf(buffer.data(), buffer.size(), format, args1);
+  va_end(args1);
+
+  logger(level, std::string(buffer.data(), static_cast<size_t>(size)));
 }
 
 void NDTCore::set_configurations(const NDTConfig &configs) {
   configs_ = configs;
 }
 
-void check_config(NDTConfig &configs) {
+void NDTCore::check_config(NDTConfig &configs) {
   if (configs.score_threshold_ < 0.0f) {
     throw;
   }
@@ -38,8 +66,8 @@ void NDTCore::replace_target_points(const std::vector<Point3D> &points) {
   add_target_points(points);
 }
 
-Transform4D NDTCore::align(const std::vector<Point3D> &points,
-                           const TransformVec6D &initial_transform) {
+TransformDatas NDTCore::align(const std::vector<Point3D> &points,
+                              const TransformVec6D &initial_transform) {
   return matcher_->align(points, *voxel_grid_, initial_transform);
 }
 } // namespace PureNDT3D

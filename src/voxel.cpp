@@ -21,7 +21,7 @@ const Voxel *VoxelGrid::get_voxel_const(const Point3D &point) const {
   return get_voxel_const(get_point_index(point));
 }
 
-VoxelGrid::VoxelGrid(const NDTConfig &config) { config_ = config; }
+VoxelGrid::VoxelGrid(const NDTConfig &config) : config_(config) { ; }
 
 void VoxelGrid::add_points(std::vector<Point3D> points) {
   for (Point3D point : points) {
@@ -30,7 +30,8 @@ void VoxelGrid::add_points(std::vector<Point3D> points) {
   }
 
   // 平均と共分散行列を求める
-  NDTCalculator::calc_statistics(*this);
+  NDTCalculator::calc_statistics(*this, config_.outlier_ratio_,
+                                 config_.voxel_resolution_m_);
 }
 
 void VoxelGrid::remove_all_points() { voxels_.clear(); }

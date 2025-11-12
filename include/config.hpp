@@ -18,8 +18,9 @@ struct NDTConfig {
   double score_threshold_{0.1};
   double levenberg_marquardt_lambda_{1e-6};
 
-  double outlier_ratio_{0.05f};
+  double outlier_ratio_{0.05};
 
+  bool use_second_order_derivative_;
   LoggerCallback logger_{nullptr};
 };
 } // namespace PureNDT3D

@@ -21,10 +21,10 @@ class NDTMatcher {
 public:
   explicit NDTMatcher(const NDTConfig &config);
 
-  Transform4D align(const std::vector<Point3D> &source_points,
-                    const VoxelGrid &voxel_grid,
-                    const TransformVec6D initial_transform);
-  NDTConfig config_;
+  TransformDatas align(const std::vector<Point3D> &source_points,
+                       const VoxelGrid &voxel_grid,
+                       const TransformVec6D initial_transform);
+  const NDTConfig &config_;
   std::unique_ptr<NDTOptimizer> optimizer_;
 };
 } // namespace PureNDT3D

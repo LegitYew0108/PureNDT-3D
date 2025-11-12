@@ -1,10 +1,12 @@
 #pragma once
 
 #include "config.hpp"
+#include "eigen3/Eigen/Cholesky"
+#include "eigen3/Eigen/Core"
+#include "eigen3/Eigen/Geometry"
+#include "eigen3/Eigen/LU"
+#include "transform.hpp"
 #include "voxel.hpp"
-#include <eigen3/Eigen/Cholesky>
-#include <eigen3/Eigen/Core>
-#include <eigen3/Eigen/LU>
 #include <memory>
 
 namespace PureNDT3D {
@@ -29,7 +31,7 @@ RotationMatrix3D get_rotation_mat_y(double theta);
 RotationMatrix3D get_rotation_mat_z(double theta);
 
 struct TransformUpdateType {
-  Transform4D transform;
+  TransformDatas transform;
   double score;
 };
 
@@ -51,6 +53,10 @@ protected:
   get_second_order_derivative(const Point3D &point,
                               const TransformVec6D &transform);
 
+  Eigen::Matrix<double, 6, 6> get_no_second_order_derivative_hessian(
+      const Point3D &transformed_point, const double &before_score,
+      const Eigen::Matrix<double, 3, 6> &J, const Voxel &voxel);
+
   Eigen::Matrix<double, 6, 6> get_hessian(
       const Point3D &points, const double &before_score,
       const Eigen::Matrix<double, 3, 6> &J,
@@ -66,6 +72,6 @@ protected:
 
   Eigen::Matrix3d skew(const Point3D &p);
 
-  NDTConfig config_;
+  const NDTConfig &config_;
 };
 } // namespace PureNDT3D
