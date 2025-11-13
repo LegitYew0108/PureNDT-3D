@@ -8,6 +8,10 @@ std::unordered_map<VoxelIndex, Voxel, VoxelHash> *VoxelGrid::get_voxels() {
   return &voxels_;
 }
 
+Voxel::Voxel()
+    : average(Point3D::Zero()), covariance(Covariance3D::Zero()), d_1(0.0),
+      d_2(0.0), has_valid_covariance(false) {}
+
 const Voxel *VoxelGrid::get_voxel_const(const VoxelIndex &index) const {
   auto it = voxels_.find(index);
   if (it == voxels_.end()) {

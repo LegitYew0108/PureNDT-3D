@@ -52,6 +52,7 @@ using Point3D = Eigen::Vector3d;
 using Covariance3D = Eigen::Matrix3d;
 
 struct Voxel {
+  explicit Voxel();
   // for NDT
   Point3D average;
   Covariance3D covariance;
