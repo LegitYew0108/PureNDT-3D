@@ -4,12 +4,9 @@
 #include <cstdio>
 #include <filesystem>
 #include <memory>
+#include <stdexcept>
 
 namespace PureNDT3D {
-NDTCore::NDTCore() {
-  voxel_grid_ = std::make_unique<VoxelGrid>(configs_);
-  matcher_ = std::make_unique<NDTMatcher>(configs_);
-}
 NDTCore::NDTCore(const NDTConfig &configs) {
   set_configurations(configs);
   voxel_grid_ = std::make_unique<VoxelGrid>(configs);
@@ -51,8 +48,10 @@ void NDTCore::set_configurations(const NDTConfig &configs) {
 
 void NDTCore::check_config(NDTConfig &configs) {
   if (configs.score_threshold_ < 0.0f) {
-    throw;
+    throw std::invalid_argument(
+        "The score_threshold cannot be set to a negative value.");
   }
+  // TODO
 }
 
 void NDTCore::add_target_points(const std::vector<Point3D> &points) {
@@ -66,8 +65,8 @@ void NDTCore::replace_target_points(const std::vector<Point3D> &points) {
   add_target_points(points);
 }
 
-TransformDatas NDTCore::align(const std::vector<Point3D> &points,
-                              const TransformVec6D &initial_transform) {
+TransformType NDTCore::align(const std::vector<Point3D> &points,
+                             const TransformType &initial_transform) {
   return matcher_->align(points, *voxel_grid_, initial_transform);
 }
 } // namespace PureNDT3D

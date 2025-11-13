@@ -11,6 +11,7 @@ add_library(PureNDT3D SHARED
 	src/voxel.cpp
 	src/ndt_optimizer.cpp
 	src/ndt_matcher.cpp
+	src/transform.cpp
 )
 
 target_include_directories(PureNDT3D PUBLIC

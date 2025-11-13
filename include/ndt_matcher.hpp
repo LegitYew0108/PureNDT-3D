@@ -21,9 +21,9 @@ class NDTMatcher {
 public:
   explicit NDTMatcher(const NDTConfig &config);
 
-  TransformDatas align(const std::vector<Point3D> &source_points,
-                       const VoxelGrid &voxel_grid,
-                       const TransformVec6D initial_transform);
+  TransformType align(const std::vector<Point3D> &source_points,
+                      const VoxelGrid &voxel_grid,
+                      const TransformType initial_transform);
   const NDTConfig &config_;
   std::unique_ptr<NDTOptimizer> optimizer_;
 };

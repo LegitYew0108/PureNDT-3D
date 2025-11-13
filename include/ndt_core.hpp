@@ -22,10 +22,6 @@ public:
   /**
    * @brief constructor with configs for NDTCore.
    */
-  explicit NDTCore();
-  /**
-   * @brief constructor with configs for NDTCore.
-   */
   explicit NDTCore(const NDTConfig &configs);
   /**
    * @brief destructor with configs for NDTCore.
@@ -53,8 +49,8 @@ public:
   /**
    * @brief input points for PureNDT3D and returns aligned new_transform.
    */
-  TransformDatas align(const std::vector<Point3D> &points,
-                       const TransformVec6D &initial_transform);
+  TransformType align(const std::vector<Point3D> &points,
+                      const TransformType &initial_transform);
 
 protected:
   NDTConfig configs_;
