@@ -30,7 +30,7 @@ void VoxelGrid::add_points(std::vector<Point3D> points) {
   }
 
   // 平均と共分散行列を求める
-  NDTCalculator::calc_statistics(*this, config_.outlier_ratio_,
+  NDTCalculator::calc_statistics(config_.logger_, *this, config_.outlier_ratio_,
                                  config_.voxel_resolution_m_);
 }
 

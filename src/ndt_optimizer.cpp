@@ -11,6 +11,8 @@ double NDTOptimizer::calc_update(const std::vector<Point3D> &source_points,
                                  TransformType &current_transform) {
   Eigen::Vector<double, 6> gradient = Eigen::Vector<double, 6>::Zero();
   Eigen::Matrix<double, 6, 6> H = Eigen::Matrix<double, 6, 6>::Zero();
+  int valid_point_num = 0;
+  double total_score = 0.0;
 
   for (Point3D point : source_points) {
     // 座標変換
@@ -45,6 +47,9 @@ double NDTOptimizer::calc_update(const std::vector<Point3D> &source_points,
       H += get_no_second_order_derivative_hessian(transformed_point, score, J,
                                                   *voxel);
     }
+
+    total_score += score;
+    valid_point_num++;
   }
 
   TransformVec6D transform_inc =
@@ -54,20 +59,8 @@ double NDTOptimizer::calc_update(const std::vector<Point3D> &source_points,
            .solve(gradient);
 
   current_transform.update(transform_inc);
-  double total_score = 0.0;
 
-  for (Point3D point : source_points) {
-    Point3D transformed_point = current_transform.transform(point);
-
-    const Voxel *voxel = voxel_grid.get_voxel_const(transformed_point);
-    if (voxel == nullptr) {
-      continue;
-    }
-
-    total_score += get_score(transformed_point, *voxel);
-  }
-
-  return total_score;
+  return total_score / valid_point_num;
 }
 
 double NDTOptimizer::get_score(const Point3D &point, const Voxel &voxel) {

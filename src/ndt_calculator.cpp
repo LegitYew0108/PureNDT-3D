@@ -1,11 +1,14 @@
 #include "ndt_calculator.hpp"
+#include "ndt_core.hpp"
 #include "voxel.hpp"
 
 namespace PureNDT3D {
 namespace NDTCalculator {
 
-void calc_statistics(VoxelGrid &voxel_grid, double outlier_ratio,
-                     double resolution_m) {
+void calc_statistics(LoggerCallback logger, VoxelGrid &voxel_grid,
+                     double outlier_ratio, double resolution_m) {
+  log(logger, LogLevel::Info,
+      "[NDTCalculator] Calculate Voxels' Average and Covariance Matrix.");
   // each voxel in voxelgrid
   for (auto &voxel_pair : *voxel_grid.get_voxels()) {
     if (voxel_pair.second.points.empty()) {
@@ -38,13 +41,17 @@ void calc_statistics(VoxelGrid &voxel_grid, double outlier_ratio,
     double det = voxel_pair.second.covariance.determinant();
     double c_1 = (1.0 - outlier_ratio) / sqrt(pow(2 * M_PI, 3) * det);
     double c_2 = 1.0 / pow(resolution_m, 3);
-    double d_3 = -log(c_2);
-    voxel_pair.second.d_1 = -log(c_1 + c_2) - d_3;
+    double d_3 = -std::log(c_2);
+    voxel_pair.second.d_1 = -std::log(c_1 + c_2) - d_3;
     voxel_pair.second.d_2 =
-        -2 * log((-log(c_1 * exp(-0.5) + c_2) - d_3) / voxel_pair.second.d_1);
+        -2 * std::log((-std::log(c_1 * exp(-0.5) + c_2) - d_3) /
+                      voxel_pair.second.d_1);
 
     voxel_pair.second.has_valid_covariance = true;
   }
+  log(logger, LogLevel::Info,
+      "[NDTCalculator] Completed to calculate NDT. total voxels:%lf",
+      voxel_grid.get_voxels()->size());
 }
 
 } // namespace NDTCalculator

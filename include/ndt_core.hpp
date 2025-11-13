@@ -15,7 +15,7 @@ using Covariance3D = Eigen::Matrix3d;
 using Transform4D = Eigen::Matrix4d;
 using TransformVec6D = Eigen::Vector<double, 6>;
 
-void log(LoggerCallback logger, LogLevel level, std::string message);
+void log(LoggerCallback logger, LogLevel level, const char *format, ...);
 
 class NDTCore {
 public:
