@@ -4,13 +4,13 @@
 
 class NdtCoreFixture : public PureNDT3D::NDTCore {
 public:
-  NdtCoreFixture() : PureNDT3D::NDTCore() {}
   NdtCoreFixture(PureNDT3D::NDTConfig &configs) : PureNDT3D::NDTCore(configs) {}
   PureNDT3D::NDTConfig get_config() { return configs_; }
 };
 
 TEST(NDTConfigTest, PositiveCase) {
-  NdtCoreFixture ndt_core = NdtCoreFixture();
+  PureNDT3D::NDTConfig initial_config{};
+  NdtCoreFixture ndt_core = NdtCoreFixture(initial_config);
 
   PureNDT3D::NDTConfig config = PureNDT3D::NDTConfig();
   config.voxel_resolution_m_ = 0.1f;
@@ -31,7 +31,8 @@ TEST(NDTConfigTest, PositiveCase) {
 }
 
 TEST(NDTConfigTest, NegativeCase) {
-  NdtCoreFixture ndt_core = NdtCoreFixture();
+  PureNDT3D::NDTConfig initial_config{};
+  NdtCoreFixture ndt_core = NdtCoreFixture(initial_config);
   PureNDT3D::NDTConfig config = PureNDT3D::NDTConfig();
   config.voxel_resolution_m_ = -0.1f;
 
