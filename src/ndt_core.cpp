@@ -9,8 +9,8 @@
 namespace PureNDT3D {
 NDTCore::NDTCore(const NDTConfig &configs) {
   set_configurations(configs);
-  voxel_grid_ = std::make_unique<VoxelGrid>(configs);
-  matcher_ = std::make_unique<NDTMatcher>(configs);
+  voxel_grid_ = std::make_unique<VoxelGrid>(configs_);
+  matcher_ = std::make_unique<NDTMatcher>(configs_);
 }
 NDTCore::~NDTCore() {}
 
