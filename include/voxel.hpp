@@ -59,6 +59,7 @@ struct Voxel {
   std::vector<Point3D> points;
   double d_1;
   double d_2;
+  bool has_valid_covariance;
 };
 
 class VoxelGrid {

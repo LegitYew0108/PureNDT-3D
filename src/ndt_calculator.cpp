@@ -9,6 +9,11 @@ void calc_statistics(VoxelGrid &voxel_grid, double outlier_ratio,
   // each voxel in voxelgrid
   for (auto &voxel_pair : *voxel_grid.get_voxels()) {
     if (voxel_pair.second.points.empty()) {
+      voxel_pair.second.has_valid_covariance = false;
+      continue;
+    }
+    if (voxel_pair.second.points.size() < 5) {
+      voxel_pair.second.has_valid_covariance = false;
       continue;
     }
 
@@ -37,6 +42,8 @@ void calc_statistics(VoxelGrid &voxel_grid, double outlier_ratio,
     voxel_pair.second.d_1 = -log(c_1 + c_2) - d_3;
     voxel_pair.second.d_2 =
         -2 * log((-log(c_1 * exp(-0.5) + c_2) - d_3) / voxel_pair.second.d_1);
+
+    voxel_pair.second.has_valid_covariance = true;
   }
 }
 

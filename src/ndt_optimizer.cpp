@@ -20,6 +20,9 @@ double NDTOptimizer::calc_update(const std::vector<Point3D> &source_points,
     if (voxel == nullptr) {
       continue;
     }
+    if (!voxel->has_valid_covariance) {
+      continue;
+    }
 
     double score = get_score(transformed_point, *voxel);
 
