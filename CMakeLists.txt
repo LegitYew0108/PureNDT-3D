@@ -5,6 +5,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+find_package(OpenMP REQUIRED)
+
 add_library(PureNDT3D SHARED
 	src/ndt_core.cpp
 	src/ndt_calculator.cpp
@@ -16,6 +18,9 @@ add_library(PureNDT3D SHARED
 
 target_include_directories(PureNDT3D PUBLIC
 	include)
+
+target_link_libraries(PureNDT3D PUBLIC
+	OpenMP::OpenMP_CXX)
 
 if(BUILD_TESTING)
     # Enable testing, and if so, download and configure GTest
