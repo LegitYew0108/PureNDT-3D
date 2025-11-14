@@ -65,6 +65,16 @@ void NDTCore::replace_target_points(const std::vector<Point3D> &points) {
   add_target_points(points);
 }
 
+std::vector<Point3D> NDTCore::filter_points(const std::vector<Point3D> &points,
+                                            double voxel_resolution_m) {
+  NDTConfig filter_config{};
+  filter_config.voxel_resolution_m_ = voxel_resolution_m;
+  VoxelGrid filter_grid(filter_config);
+  filter_grid.add_points(points);
+  std::vector<Point3D> filtered_points = filter_grid.get_average_points();
+  return filtered_points;
+}
+
 TransformType NDTCore::align(const std::vector<Point3D> &points,
                              const TransformType &initial_transform) {
   return matcher_->align(points, *voxel_grid_, initial_transform);

@@ -78,6 +78,7 @@ public:
   const Voxel *get_voxel_const(const Point3D &point) const;
 
   VoxelIndex get_point_index(const Point3D &point) const;
+  std::vector<Point3D> get_average_points() const;
 
 protected:
   std::unordered_map<VoxelIndex, Voxel, VoxelHash> voxels_;

@@ -50,4 +50,12 @@ VoxelIndex VoxelGrid::get_point_index(const Point3D &point) const {
       static_cast<int>(std::floor(point(2) / config_.voxel_resolution_m_));
   return index;
 }
+
+std::vector<Point3D> VoxelGrid::get_average_points() const {
+  std::vector<Point3D> average_points;
+  for (std::pair<VoxelIndex, Voxel> voxel : voxels_) {
+    average_points.push_back(voxel.second.average);
+  }
+  return average_points;
+}
 } // namespace PureNDT3D

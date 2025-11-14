@@ -51,6 +51,12 @@ public:
    */
   TransformType align(const std::vector<Point3D> &points,
                       const TransformType &initial_transform);
+  /**
+   * @brief decrease points filter
+   * @note using voxel grid filter
+   */
+  std::vector<Point3D> filter_points(const std::vector<Point3D> &points,
+                                     double voxel_resolution_m);
 
 protected:
   NDTConfig configs_;
