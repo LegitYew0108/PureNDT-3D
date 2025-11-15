@@ -1,6 +1,7 @@
 #include "voxel.hpp"
 #include "config.hpp"
 #include "ndt_calculator.hpp"
+#include "ndt_core.hpp"
 #include <unordered_map>
 
 namespace PureNDT3D {
@@ -31,6 +32,11 @@ void VoxelGrid::add_points(std::vector<Point3D> points) {
   for (Point3D point : points) {
     VoxelIndex index = get_point_index(point);
     voxels_[index].points.push_back(point);
+  }
+
+  for (std::pair<const VoxelIndex, Voxel> voxel : voxels_) {
+    log(config_.logger_, LogLevel::Info, "VoxelIndex: (%lf, %lf, %lf)",
+        voxel.first.x, voxel.first.y, voxel.first.z);
   }
 
   // 平均と共分散行列を求める
