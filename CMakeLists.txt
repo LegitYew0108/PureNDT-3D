@@ -40,6 +40,11 @@ if(BUILD_TESTING)
     target_link_libraries(interface_test
         PureNDT3D
         GTest::gtest_main)
+    add_executable(matching_test
+        test/matching_test.cpp)
+    target_link_libraries(matching_test
+        PureNDT3D
+        GTest::gtest_main)
 
     include(GoogleTest)
     gtest_discover_tests(interface_test)
