@@ -32,7 +32,8 @@ public:
   explicit TransformType(const TransformVec6D &vec);
   explicit TransformType(const Transform4D &mat);
 
-  void update(const TransformVec6D &transform_inc);
+  void update(TransformVec6D &transform_inc, const double &trans_alpha,
+              const double &rot_alpha);
 
   // 4x4行列を返す (se3_exp での更新や、最終結果として使う)
   const Transform4D &get_matrix() const;

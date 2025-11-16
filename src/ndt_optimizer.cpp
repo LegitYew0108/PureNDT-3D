@@ -78,7 +78,8 @@ double NDTOptimizer::calc_update(const std::vector<Point3D> &source_points,
            .ldlt()
            .solve(gradient);
 
-  current_transform.update(transform_inc);
+  current_transform.update(transform_inc, config_.trans_alpha,
+                           config_.rot_alpha);
 
   return total_score / valid_point_num;
 }
@@ -95,13 +96,11 @@ double NDTOptimizer::get_score(const Point3D &point, const Voxel &voxel) {
 Eigen::Matrix<double, 3, 6>
 NDTOptimizer::get_jacobian(const Point3D &point,
                            const TransformType &transform) {
-  // Get rotation angles from the transform vector, which is [x, y, z, yaw, pitch, roll]
-  // vec[3] -> yaw (rot_z)
-  // vec[4] -> pitch (rot_y)
-  // vec[5] -> roll (rot_x)
-  double rot_z = transform.get_vector()[3]; // yaw
+  // Get rotation angles from the transform vector, which is [x, y, z, roll,
+  // pitch, yaw]
+  double rot_x = transform.get_vector()[3]; // roll
   double rot_y = transform.get_vector()[4]; // pitch
-  double rot_x = transform.get_vector()[5]; // roll
+  double rot_z = transform.get_vector()[5]; // yaw
 
   // Pre-calculate sin and cos
   double s_x = sin(rot_x);
@@ -111,32 +110,26 @@ NDTOptimizer::get_jacobian(const Point3D &point,
   double s_z = sin(rot_z);
   double c_z = cos(rot_z);
 
-  // Rotation matrices (for Z-Y-X Euler angles)
-  Eigen::Matrix3d R_x, R_y, R_z;
-  R_x << 1, 0, 0, 0, c_x, -s_x, 0, s_x, c_x;
-  R_y << c_y, 0, s_y, 0, 1, 0, -s_y, 0, c_y;
-  R_z << c_z, -s_z, 0, s_z, c_z, 0, 0, 0, 1;
+  double a = point[0] * (-s_x * s_z + c_x * s_y * c_z) +
+             point[1] * (-s_x * c_z - c_x * s_y * s_z) +
+             point[2] * (-c_x * c_y);
+  double b = point[0] * (c_x * s_z + s_x * s_y * c_z) +
+             point[1] * (-s_x * s_y * s_z + c_x * c_z) +
+             point[2] * (-s_x * c_y);
+  double c = point[0] * (-s_y * c_z) + point[1] * (s_y * s_z) + point[2] * c_y;
+  double d = point[0] * (s_x * c_y * c_z) + point[1] * (-s_x * c_y * s_z) +
+             point[2] * (s_x * s_y);
+  double e = point[0] * (-c_x * c_y * c_z) + point[1] * (c_x * c_y * s_z) +
+             point[2] * -c_x * s_y;
+  double f = point[0] * -c_y * s_z + point[1] * -c_y * c_z;
+  double g = point[0] * (c_x * c_z - s_x * s_y * s_z) +
+             point[1] * (-c_x * s_z - s_x * s_y * c_z);
+  double h = point[0] * (s_x * c_z + c_x * s_y * s_z) +
+             point[1] * (c_x * s_y * c_z - s_x * s_z);
 
-  // Derivative of rotation matrices
-  Eigen::Matrix3d dR_dx, dR_dy, dR_dz;
-  dR_dx << 0, 0, 0, 0, -s_x, -c_x, 0, c_x, -s_x; // Derivative w.r.t. roll
-  dR_dy << -s_y, 0, c_y, 0, 0, 0, -c_y, 0, -s_y; // Derivative w.r.t. pitch
-  dR_dz << -s_z, -c_z, 0, c_z, -s_z, 0, 0, 0, 0; // Derivative w.r.t. yaw
-
-  // Jacobian calculation using matrix chain rule for a Z-Y-X rotation
-  // d(R*p)/d(roll)
-  Eigen::Vector3d J_rot_x = R_z * R_y * dR_dx * point;
-  // d(R*p)/d(pitch)
-  Eigen::Vector3d J_rot_y = R_z * dR_dy * R_x * point;
-  // d(R*p)/d(yaw)
-  Eigen::Vector3d J_rot_z = dR_dz * R_y * R_x * point;
-
-  Eigen::Matrix<double, 3, 6> Jacobian;
+  Eigen::Matrix<double, 3, 6> Jacobian = Eigen::Matrix<double, 3, 6>::Zero();
   Jacobian.block<3, 3>(0, 0) = Eigen::Matrix3d::Identity();
-  // The columns of the Jacobian must match the order in the transform vector: [x, y, z, yaw, pitch, roll]
-  Jacobian.col(3) = J_rot_z; // Partial derivative with respect to yaw
-  Jacobian.col(4) = J_rot_y; // Partial derivative with respect to pitch
-  Jacobian.col(5) = J_rot_x; // Partial derivative with respect to roll
+  Jacobian.block<3, 3>(0, 3) << 0, c, f, a, d, g, b, e, h;
 
   return Jacobian;
 }
@@ -144,10 +137,10 @@ NDTOptimizer::get_jacobian(const Point3D &point,
 Eigen::Matrix<Eigen::Vector3d, 6, 6>
 NDTOptimizer::get_second_order_derivative(const Point3D &point,
                                           const TransformType &transform) {
-  // Correctly assign Euler angles: [x, y, z, yaw, pitch, roll]
-  double rot_z = transform.get_vector()[3]; // yaw
+  // Correctly assign Euler angles: [x, y, z, roll, pitch, yaw]
+  double rot_x = transform.get_vector()[3]; // roll
   double rot_y = transform.get_vector()[4]; // pitch
-  double rot_x = transform.get_vector()[5]; // roll
+  double rot_z = transform.get_vector()[5]; // yaw
   double s_x = sin(rot_x);
   double c_x = cos(rot_x);
   double s_y = sin(rot_y);
