@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 find_package(OpenMP REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 add_library(PureNDT3D SHARED
 	src/ndt_core.cpp
@@ -20,7 +21,7 @@ target_include_directories(PureNDT3D PUBLIC
 	include)
 
 target_link_libraries(PureNDT3D PUBLIC
-	OpenMP::OpenMP_CXX)
+	OpenMP::OpenMP_CXX Eigen3::Eigen)
 
 if(BUILD_TESTING)
     # Enable testing, and if so, download and configure GTest

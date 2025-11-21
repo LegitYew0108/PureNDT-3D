@@ -76,13 +76,7 @@ TransformType::TransformType(const Transform4D &mat) : mat_(mat) {
   sync_vec_from_mat(); // mat から vec を計算
 }
 
-void TransformType::update(TransformVec6D &transform_inc,
-                           const double &trans_alpha, const double &rot_alpha) {
-  transform_inc.normalize();
-  Eigen::Vector<double, 6> alpha_vec;
-  alpha_vec << trans_alpha, trans_alpha, trans_alpha, rot_alpha, rot_alpha,
-      rot_alpha;
-  transform_inc = transform_inc.array() * alpha_vec.array();
+void TransformType::update(TransformVec6D &transform_inc) {
   vec_ = vec_ + transform_inc;
 
   sync_mat_from_vec();

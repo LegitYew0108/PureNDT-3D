@@ -15,12 +15,13 @@ struct NDTConfig {
 
   // === 最適化計算の設定===
   int max_iterations_{100};
-  double score_threshold_{0.1};
+  double score_threshold_{-6.0};
   double levenberg_marquardt_lambda_{1e-6};
 
   double outlier_ratio_{0.05};
   double trans_alpha{0.1};
   double rot_alpha{0.05};
+  double transform_epsilon{1e-8};
 
   bool use_second_order_derivative_;
   LoggerCallback logger_{nullptr};

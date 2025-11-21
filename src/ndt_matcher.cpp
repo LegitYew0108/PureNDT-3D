@@ -18,10 +18,27 @@ TransformType NDTMatcher::align(const std::vector<Point3D> &source_points,
   log(config_.logger_, LogLevel::Info,
       "[NDTMatcher] NDT Matching Loop Start==============================");
   while (true) {
+    TransformType previous_transform = current_transform;
     double score =
         optimizer_->calc_update(source_points, voxel_grid, current_transform);
     log(config_.logger_, LogLevel::Info, "[NDTMatcher] Score: %lf", score);
     iteration++;
+
+    double delta_trans = (current_transform.get_vector().head<3>() -
+                          previous_transform.get_vector().head<3>())
+                             .norm();
+    double delta_rot = (current_transform.get_vector().tail<3>() -
+                        previous_transform.get_vector().tail<3>())
+                           .norm();
+
+    if (delta_trans < config_.transform_epsilon &&
+        delta_rot < config_.transform_epsilon) {
+      log(config_.logger_, LogLevel::Info,
+          "[NDTMatcher] Converged (Update size is small). finishing Matching "
+          "Loop...");
+      break;
+    }
+
     if (score < config_.score_threshold_) {
       log(config_.logger_, LogLevel::Info,
           "[NDTMatcher] Score below the threshold has been detected. finishing "
